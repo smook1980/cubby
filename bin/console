@@ -1,14 +1,77 @@
 #!/usr/bin/env ruby
 
-require "bundler/setup"
-require "cubby"
+require 'bundler/setup'
+require 'cubby'
+require 'pry'
+require 'awesome_print'
+require 'rainbow'
 
-# You can add fixtures and/or initialization code here to make experimenting
-# with your gem easier. You can also use a different console, if you like.
 
-# (If you use this, don't forget to add pry to your Gemfile!)
-# require "pry"
-# Pry.start
+class Cubby::Console
+  attr_reader :store, :tmpdir
 
-require "irb"
-IRB.start
+  def initialize
+    reset!
+
+    ['SIGINT', 'SIGHUP'].each { |signal| trap(signal) { cleanup! } }
+  end
+
+  def reset!(opts = {})
+    cleanup!
+    @tmpdir = Pathname Dir.mktmpdir
+    Cubby.config @tmpdir, opts
+    @store = Cubby.store
+  end
+
+  def cleanup!
+    @store.close! unless @store.nil?
+    @store = nil
+    FileUtils.remove_entry @tmpdir unless @tmpdir.nil?
+    @tmpdir = nil
+  end
+
+  def status
+    puts <<-INFO
+Path: #{store.path.realpath}
+
+LMDB Info:
+#{info}
+
+LMDB Flags:
+#{flags}
+
+LMDB Stat:
+#{stat}
+
+    INFO
+  end
+
+  def info
+    store.env.info.ai
+  end
+
+  def flags
+    store.env.flags.ai
+  end
+
+  def stat
+    store.env.stat.ai
+  end
+
+  def start
+    puts <<-EOF
+Console:
+  reset!: Create a fresh environment
+  store:  Instance of store
+  tmpdir: Data directory
+  status: LMDB Status
+    EOF
+
+    AwesomePrint.pry!
+    Pry.start self
+  ensure
+    cleanup!
+  end
+end
+
+Cubby::Console.new.start

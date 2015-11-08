@@ -7,12 +7,12 @@ describe Cubby do
     it 'sets the database root from path' do
       expect(LMDB).to receive(:new).with(path, kind_of(Hash))
 
-      Cubby.config path: path
+      Cubby.config path
     end
   end
 
   describe '.store' do
-    before { Cubby.config path: path }
+    before { Cubby.config path }
 
     it 'is an instance of store' do
       expect(Cubby.store).to be_instance_of(Cubby::Store)

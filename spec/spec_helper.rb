@@ -4,6 +4,24 @@ require 'cubby'
 module SpecHelper
   class << self
     attr_accessor :tmpdir
+
+    def reset!
+      @test_store.close!
+      @test_store = nil
+      FileUtils.remove_entry @tmpdir
+      @tmpdir = nil
+    rescue => e
+      $stderr.puts "Failed to clean up after test!\n #{e}"
+    end
+
+    def create_test_store(opts = {})
+      @test_store.close! unless @test_store.nil?
+      @test_store = Cubby::Store.new()
+
+      def test_store
+        @test_store ||= reset_store
+      end
+    end
   end
 end
 
