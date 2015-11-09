@@ -6,11 +6,11 @@ module Cubby
       end
 
       module ClassMethods
-        def self.store
+        def store
           @store || Cubby.store
         end
 
-        def self.store=(store)
+        def store=(store)
           @store = store
         end
       end

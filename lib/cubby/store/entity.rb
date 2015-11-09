@@ -1,8 +1,8 @@
-require_relative 'bucket_item'
+require_relative 'entity'
 
 module Cubby
   class Store
-    class BucketItem
+    class Entity
       attr_reader :bucket, :id
 
       def initialize(bucket, id)

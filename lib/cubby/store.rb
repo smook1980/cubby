@@ -36,12 +36,12 @@ module Cubby
     # @return [Hash] store environment properties
     def_delegator :@env, :flags,       :config
 
-    # Return a named key value database
+    # Return a named key value bucket for a given model
     #
     # @!method []
     # @param  [Cubby::Model]
     # @return [Cubby::Database] Reference to named database
-    def_delegator :@databases, :[]
+    def_delegator :@buckets, :[]
 
     # Open a model store at the given path.  Call #close! when the store is no
     # longer needed to save data to disk and cleanup.
@@ -105,7 +105,7 @@ module Cubby
       @env = LMDB.new(path, DEFAULT_OPTIONS.merge(opts))
       this = self
 
-      @databases = Hash.new do |cache, model|
+      @buckets = Hash.new do |cache, model|
         klass = model_class(model)
 
         if cache.key? klass

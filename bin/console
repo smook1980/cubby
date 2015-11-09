@@ -19,7 +19,7 @@ class Cubby::Console
   def reset!(opts = {})
     cleanup!
     @tmpdir = Pathname Dir.mktmpdir
-    Cubby.config @tmpdir, opts
+    Cubby.open @tmpdir, opts
     @store = Cubby.store
   end
 
