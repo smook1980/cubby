@@ -56,7 +56,7 @@ describe Cubby::Model do
       [
         [Cubby::Types::String, 123, '123'],
         [Cubby::Types::Integer, "123", 123],
-        [Cubby::Types::Boolean, 1, TrueClass],
+        [Cubby::Types::Boolean, 1, true],
         [Cubby::Types::Float, '0.5', 0.5],
         [Cubby::Types::Date, Date.today.to_s, Date.today],
         [Cubby::Types::DateTime, (expected = DateTime.now).iso8601(9).to_s, expected]
@@ -285,6 +285,33 @@ describe Cubby::Model do
 
       it 'is not a new model' do
         expect(subject.new_model?).to be_falsey
+      end
+    end
+  end
+
+  context 'when saving and restoring' do
+    before { model_class.store = Cubby::Store.new SpecHelper.tmpdir }
+    after  { model_class.store.close! }
+
+    [
+      [Cubby::Types::String, 123, '123'],
+      [Cubby::Types::Integer, "123", 123],
+      [Cubby::Types::Boolean, true, true],
+      [Cubby::Types::Float, 1, 1.0],
+      [Cubby::Types::Date, Date.today.to_s, Date.today],
+      [Cubby::Types::DateTime, (expected = DateTime.now).iso8601(9).to_s, expected]
+    ].each do |type, input, output|
+      it "handles #{type} corectly" do
+        model_class.class_eval do
+          attribute :field, type
+        end
+
+        saved_model = model_class.new
+        saved_model.field = input
+        saved_model.save
+
+        restored_model = model_class.find(saved_model.id)
+        expect(restored_model.field).to eq(output)
       end
     end
   end

@@ -16,12 +16,12 @@ module Cubby
         return if value.nil?
 
         case value
-        when 1, '1', 'true', 1.0, 'True', 'TRUE', TrueClass
-          TrueClass
-        when 0, '0', 'false', 0.0, 'False', 'FALSE', FalseClass
-          FalseClass
+        when true, 1, '1', 'true', 1.0, 'True', 'TRUE'
+          true
+        when false, 0, '0', 'false', 0.0, 'False', 'FALSE'
+          false
         else
-          fail TypeError("Given value #{value} cannot be converted to boolean")
+          fail TypeError, "Given value #{value} cannot be converted to boolean"
         end
       end
 
