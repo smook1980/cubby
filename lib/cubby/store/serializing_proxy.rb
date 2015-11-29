@@ -6,31 +6,80 @@ module Cubby
       CUBBY_TYPE_PACK = 'CubbyTypePack'.freeze
 
       def self.pack(value)
-        case value.class.name
-        when Date.name
-          [CUBBY_TYPE_PACK, Date.name, value.iso8601].to_msgpack
-        when DateTime.name
-          [CUBBY_TYPE_PACK, DateTime.name, value.iso8601(9)].to_msgpack
-        when Symbol.name
-          [CUBBY_TYPE_PACK, value.class.name, value.to_s].to_msgpack
-        else
-          value.to_msgpack
-        end
+        type = if value.is_a? Cubby::Types::ArrayProxy
+                 value.type_name
+               else
+                 value.class.name
+               end
+
+        data = case type
+               when 'Date'.freeze
+                 [
+                   CUBBY_TYPE_PACK,
+                   type,
+                   value.iso8601
+                 ]
+               when 'DateTime'.freeze
+                 [
+                   CUBBY_TYPE_PACK,
+                   type,
+                   value.iso8601(9)
+                 ]
+               when 'Symbol'.freeze
+                 [
+                   CUBBY_TYPE_PACK,
+                   type,
+                   value.to_s
+                 ]
+               when 'Array[Cubby::Types::Date]'.freeze
+                 [
+                   CUBBY_TYPE_PACK,
+                   type,
+                   value.map(&:iso8601)
+                 ]
+               when 'Array[Cubby::Types::DateTime]'.freeze
+                 [
+                   CUBBY_TYPE_PACK,
+                   type,
+                   value.map { |v| v.iso8601(9) }
+                 ]
+               when 'Array[Cubby::Types::Symbol]'.freeze
+                 [
+                   CUBBY_TYPE_PACK,
+                   type,
+                   value.map(&:to_s)
+                 ]
+               else
+                 value
+               end
+
+        data.to_msgpack
       end
 
       def self.unpack(data)
-        mark_or_value, type, string_value = MessagePack.unpack(data)
-        mark_or_value == CUBBY_TYPE_PACK ? restore_type(type, string_value) : mark_or_value
+        raw_value = MessagePack.unpack(data)
+
+        if raw_value.is_a?(Array) && raw_value.first == CUBBY_TYPE_PACK
+          restore_type(raw_value[1], raw_value[2])
+        else
+          raw_value
+        end
       end
 
-      def self.restore_type(type, string_value)
+      def self.restore_type(type, raw_value)
         case type
-        when Date.name
-          Date.iso8601(string_value)
-        when DateTime.name
-          DateTime.iso8601(string_value)
-        when Symbol.name
-          string_value.to_sym
+        when 'Date'.freeze
+          Date.iso8601(raw_value)
+        when 'DateTime'.freeze
+          DateTime.iso8601(raw_value)
+        when 'Symbol'.freeze
+          raw_value.to_sym
+        when 'Array[Cubby::Types::Date]'.freeze
+          raw_value.map { |v| Date.iso8601 v }
+        when 'Array[Cubby::Types::DateTime]'.freeze
+          raw_value.map { |v| DateTime.iso8601 v }
+        when 'Array[Cubby::Types::Symbol]'.freeze
+          raw_value.map(&:to_sym)
         end
       end
 

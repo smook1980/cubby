@@ -111,10 +111,16 @@ module Cubby
     end
 
     class ArrayProxy < SimpleDelegator
+      attr_reader :type
+
       def initialize(type, values)
         @type = type
 
         super(values)
+      end
+
+      def type_name
+        "Array[#{type}]"
       end
 
       def <<(value)

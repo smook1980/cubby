@@ -313,6 +313,19 @@ describe Cubby::Model do
         restored_model = model_class.find(saved_model.id)
         expect(restored_model.field).to eq(output)
       end
+
+      it "handles an Array[#{type}]" do
+        model_class.class_eval do
+          attribute :field, Cubby::Types::Array[type]
+        end
+
+        saved_model = model_class.new
+        saved_model.field = [input, input, input]
+        saved_model.save
+
+        restored_model = model_class.find(saved_model.id)
+        expect(restored_model.field).to eq([output, output, output])
+      end
     end
   end
 end

@@ -42,14 +42,14 @@ module Cubby
             attr_reader :#{name}
 
             def #{name}=(value)
-                value = #{type.literal}.coerce(value) { #{name}_will_change! }
+              value = #{type.literal}.coerce(value) { #{name}_will_change! }
 
-                if !instance_variable_defined?(:@#{name}) || @#{name} != value
-                #{name}_will_change!
-                @#{name} = value
-                end
+              if !instance_variable_defined?(:@#{name}) || @#{name} != value
+              #{name}_will_change!
+              @#{name} = value
+              end
 
-                value
+              value
             end
           METH
         end
