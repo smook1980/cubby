@@ -26,7 +26,7 @@ describe Cubby::Store::Bucket do
     end
 
     it 'open the key value store' do
-      expect(subject.kvs).to be_instance_of(LMDB::Database)
+      expect(subject.kvs).to be_instance_of(Cubby::Store::SerializingProxy)
     end
   end
 

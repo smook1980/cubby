@@ -1,4 +1,4 @@
 module Cubby
-  class Error < StandardError
-  end
+  TypeError = Class.new(StandardError)
+  Error = Class.new(StandardError)
 end

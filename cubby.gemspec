@@ -20,7 +20,16 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_runtime_dependency 'lmdb'
-  spec.add_runtime_dependency 'virtus'
+  spec.add_runtime_dependency 'activemodel'
+  spec.add_runtime_dependency 'activesupport'
+  spec.add_runtime_dependency 'msgpack'
+
+  # Viable light weight faster alternative to Virtus?
+  # I should try it sometime....
+  # https://github.com/applift/fast_attributes
+  # spec.add_runtime_dependency 'fast_attributes'
+  # spec.add_runtime_dependency 'virtus'
+
   #spec.add_runtime_dependency 'rainbow'
 
   spec.add_development_dependency 'bundler', '~> 1.10'

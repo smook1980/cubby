@@ -28,13 +28,13 @@ module Cubby
     # Close all open database files and clean up resources
     #
     # @!method close!
-    def_delegator :@env, :close,       :close!
+    def_delegator :@env, :close, :close!
 
     # Get the store config
     #
     # @!method config
     # @return [Hash] store environment properties
-    def_delegator :@env, :flags,       :config
+    def_delegator :@env, :flags, :config
 
     # Return a named key value bucket for a given model
     #
