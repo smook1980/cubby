@@ -29,20 +29,4 @@ describe Cubby::Store::Bucket do
       expect(subject.kvs).to be_instance_of(Cubby::Store::SerializingProxy)
     end
   end
-
-  describe '#set' do
-    it 'saves the value to id:attribute'
-  end
-
-  describe '#get' do
-    it 'does some shit'
-  end
-
-  describe '#load' do
-    it 'does some shit'
-  end
-
-  describe '#save' do
-    it 'does some shit'
-  end
 end

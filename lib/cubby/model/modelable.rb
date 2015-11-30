@@ -18,12 +18,13 @@ module Cubby
 
         def has_one(name, model_type)
           attribute "#{name}_id", Cubby::Types::String
+          model_name = model_type.name
 
           module_eval(<<-METH, __FILE__, __LINE__)
             def #{name}
-              @#{name} ||= begin
-                             #{model_type.name}.find(#{name}_id) unless #{name}_id.nil?
-                           end
+              return @#{name} if instance_variable_defined?(:@#{name}) &&
+                                 @#{name}.present?
+              @#{name} = #{model_name}.find(#{name}_id) if #{name}_id.present?
             end
 
             def #{name}=(value)
@@ -46,8 +47,8 @@ module Cubby
               value = #{type.literal}.coerce(value) { #{name}_will_change! }
 
               if !instance_variable_defined?(:@#{name}) || @#{name} != value
-              #{name}_will_change!
-              @#{name} = value
+                #{name}_will_change!
+                @#{name} = value
               end
 
               value

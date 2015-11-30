@@ -2,13 +2,42 @@
 
 require 'bundler/setup'
 require 'cubby'
+require 'cubby/model'
 require 'pry'
 require 'awesome_print'
 require 'rainbow'
+require 'ffaker'
 
+module TestModels
+  class BasicUser < Cubby::Model
+    attribute :first_name, ::Cubby::Types::String
+    attribute :last_name, ::Cubby::Types::String
+    attribute :birthdate, ::Cubby::Types::Date
+    attribute :phone, ::Cubby::Types::String
+    attribute :height, ::Cubby::Types::Float
+    attribute :weight, ::Cubby::Types::Integer
+    attribute :minion_ids, ::Cubby::Types::Array[::Cubby::Types::String]
+
+    def self.factory
+      new.tap do |m|
+        m.first_name = FFaker::Name.first_name
+        m.last_name = FFaker::Name.last_name
+        m.birthdate = FFaker::Time.date
+        m.phone = FFaker::PhoneNumber.phone_number
+        m.height = rand(120)
+        m.weight = rand(220)
+        m.save
+      end
+    end
+  end
+end
 
 class Cubby::Console
   attr_reader :store, :tmpdir
+
+  def self.instance
+    @instance ||= new
+  end
 
   def initialize
     reset!
@@ -68,10 +97,26 @@ Console:
     EOF
 
     AwesomePrint.pry!
-    Pry.start self
+    Pry::Commands.block_command 'reset!', 'Create a fresh environment' do
+      Cubby::Console.instance.reset!
+    end
+
+    Pry::Commands.block_command 'store', 'Instance of store', keep_retval: true do
+      Cubby::Console.instance.store
+    end
+
+    Pry::Commands.block_command 'tmpdir', 'Data Directory', keep_retval: true do
+      Cubby::Console.instance.tmpdir
+    end
+
+    Pry::Commands.block_command 'cubby_stat', 'LMDB Status' do
+      output.puts Cubby::Console.instance.status
+    end
+
+    Pry.start(Cubby)
   ensure
     cleanup!
   end
 end
 
-Cubby::Console.new.start
+Cubby::Console.instance.start

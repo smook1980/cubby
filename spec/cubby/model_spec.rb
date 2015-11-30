@@ -1,8 +1,20 @@
-module Fixtures; end
+module Fixtures
+  def self.reset!
+    remove_const :TestModel
+  end
+end
 
 describe Cubby::Model do
+  before do
+    Fixtures::TestModel = Class.new(Cubby::Model)
+  end
+
+  after do
+    Fixtures.reset!
+  end
+
   let(:model_class) do
-    Class.new(Cubby::Model)
+    Fixtures::TestModel
   end
 
   context 'when subclassed' do
@@ -199,7 +211,6 @@ describe Cubby::Model do
   describe '.has_one' do
     before do
       model_class.store = Cubby::Store.new SpecHelper.tmpdir
-      ::Fixtures::TestModel = model_class
 
       model_class.class_eval do
         has_one :child_model, ::Fixtures::TestModel
@@ -366,8 +377,6 @@ describe Cubby::Model do
       end
 
       it 'handles a has_one relation' do
-        ::Fixtures::TestModel = model_class
-
         ::Fixtures::TestModel.class_eval do
           has_one :field, ::Fixtures::TestModel
         end
