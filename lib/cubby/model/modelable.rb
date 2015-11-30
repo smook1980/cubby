@@ -17,18 +17,19 @@ module Cubby
         end
 
         def has_one(name, model_type)
-          attribute "#{name}_id", MediaLocker::Types::Integer
+          attribute "#{name}_id", Cubby::Types::String
 
           module_eval(<<-METH, __FILE__, __LINE__)
             def #{name}
-              # Do something when I know how to query
-              @#{name} ||= nil # lookup by id
+              @#{name} ||= begin
+                             #{model_type.name}.find(#{name}_id) unless #{name}_id.nil?
+                           end
             end
 
             def #{name}=(value)
-              fail TypeError, "Value is not a #{model_type.name}" unless value.kind_of?(#{model_type.name}) || value.nil?
+              fail TypeError, "Value is not a #{model_type.name}" unless value.is_a?(#{model_type.name}) || value.nil?
 
-              @#{name}_id = value.nil? ? nil : value.id
+              self.#{name}_id = value.nil? ? nil : value.id
               @#{name} = value
             end
           METH

@@ -1,3 +1,5 @@
+module Fixtures; end
+
 describe Cubby::Model do
   let(:model_class) do
     Class.new(Cubby::Model)
@@ -194,6 +196,42 @@ describe Cubby::Model do
     end
   end
 
+  describe '.has_one' do
+    before do
+      model_class.store = Cubby::Store.new SpecHelper.tmpdir
+      ::Fixtures::TestModel = model_class
+
+      model_class.class_eval do
+        has_one :child_model, ::Fixtures::TestModel
+      end
+    end
+
+    after do
+      model_class.store.close!
+    end
+
+    let(:child_model) { ::Fixtures::TestModel.new }
+    subject { ::Fixtures::TestModel.new }
+
+    it 'allows a model to be assigned' do
+      subject.child_model = child_model
+      expect(subject.child_model).to eq(child_model)
+    end
+
+    it 'assigns the id' do
+      subject.child_model = child_model
+      expect(subject.child_model_id).to eq(child_model.id)
+    end
+
+    it 'allows for nil' do
+      subject.child_model = child_model
+      subject.child_model = nil
+
+      expect(subject.child_model_id).to be_nil
+      expect(subject.child_model).to be_nil
+    end
+  end
+
   describe '#save' do
     before do
       model_class.store = Cubby::Store.new SpecHelper.tmpdir
@@ -325,6 +363,25 @@ describe Cubby::Model do
 
         restored_model = model_class.find(saved_model.id)
         expect(restored_model.field).to eq([output, output, output])
+      end
+
+      it 'handles a has_one relation' do
+        ::Fixtures::TestModel = model_class
+
+        ::Fixtures::TestModel.class_eval do
+          has_one :field, ::Fixtures::TestModel
+        end
+
+        child_model = ::Fixtures::TestModel.new
+        child_model.save
+
+        saved_model = ::Fixtures::TestModel.new
+        saved_model.field = child_model
+        saved_model.save
+
+        restored_model = model_class.find(saved_model.id)
+        expect(restored_model.field_id).to eq(child_model.id)
+        expect(restored_model.field).to eq(child_model)
       end
     end
   end

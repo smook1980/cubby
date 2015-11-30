@@ -16,16 +16,22 @@ module Cubby
         klass.class_eval do
           EXTENSIONS.each { |extension| include extension }
         end
-
-        # klass.instance_variable_set('@redis', nil)
-        # klass.instance_variable_set('@redis_objects', {})
-        # klass.send :include, InstanceMethods
-        # klass.extend ClassMethods
       end
     end
 
     def id
-      @_id ||= SecureRandom.uuid
+      @_id ||= SecureRandom.uuid.freeze
     end
+
+    def hash
+      id.hash
+    end
+
+    def ==(other)
+      super ||
+      other.instance_of?(self.class) &&
+      other.id == id
+    end
+    alias :eql? :==
   end
 end
