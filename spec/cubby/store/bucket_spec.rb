@@ -6,11 +6,7 @@ describe Cubby::Store::Bucket do
   end
 
   let(:model) do
-    Class.new(Cubby::Model) do
-      def self.name
-        'TestModel'.freeze
-      end
-    end
+    SpecHelper.test_user_model
   end
 
   let(:lmdb_env) { Cubby.store.env }
@@ -27,6 +23,18 @@ describe Cubby::Store::Bucket do
 
     it 'open the key value store' do
       expect(subject.kvs).to be_instance_of(Cubby::Store::SerializingProxy)
+    end
+  end
+
+  describe '#each' do
+    before do
+      @users = (1..5).map { SpecHelper.build_user_instance.tap(&:save) }
+    end
+
+    it 'yields for each model saved' do
+      models = []
+      subject.each { |model| models << model }
+      expect(models.count).to be(5)
     end
   end
 end

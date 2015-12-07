@@ -50,6 +50,14 @@ module Cubby
             new.load! bucket.load(id)
           end
         end
+
+        def all
+          enum_for
+        end
+
+        def each
+          bucket.each { |data| yield new.load!(data) }
+        end
       end
     end
   end

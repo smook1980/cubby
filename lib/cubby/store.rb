@@ -2,6 +2,7 @@ require 'forwardable'
 require 'weakref'
 require 'lmdb'
 require_relative 'store/bucket'
+require_relative 'store/model_reader'
 
 module Cubby
   class Store

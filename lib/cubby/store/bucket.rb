@@ -17,16 +17,17 @@ module Cubby
       end
 
       def load(id)
-        Entity.new(self, id)
+        Entity.find(kvs, id)
       end
 
       def save(id, changeset)
         @store.with_transaction do
           meta = kvs[id]
+          # TODO: Store schema, timestamps in meta record.
           if meta.nil?
             kvs[id] = "meta"
-          else
-            kvs[id] = "meta"
+          # else
+          #   kvs[id] = "meta"
           end
 
           changeset.each do |attribute, value|
@@ -40,6 +41,23 @@ module Cubby
 
       def set(id, attribute, value)
         kvs[key_for(id, attribute)] = value
+      end
+
+      def each
+        kvs.cursor do |c|
+          previous_id = nil
+          c.first
+
+          loop do
+            key = c.get.first
+            id = key.split('::').first
+            break if id == previous_id
+            yield Entity.new(c)
+            previous_id = id
+          end
+        end
+
+        nil
       end
 
       private
