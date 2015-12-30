@@ -52,7 +52,7 @@ module Cubby
             key = c.get.first
             id = key.split('::').first
             break if id == previous_id
-            yield Entity.new(c)
+            yield EntityReader.read_entity!(c)
             previous_id = id
           end
         end

@@ -1,7 +1,8 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+require 'forwardable'
 require 'cubby'
 require 'ffaker'
-require 'forwardable'
+require 'rspec'
 
 module SpecHelper
   class << self
@@ -19,7 +20,7 @@ module SpecHelper
 
     def create_test_store(opts = {})
       @test_store.close! unless @test_store.nil?
-      @test_store = Cubby::Store.new
+      @test_store = Cubby::Store.new(tmpdir, opts)
     end
 
     def test_store
@@ -37,8 +38,6 @@ module SpecHelper
       end
     end
 
-    # Build a fresh instance of the class for each call
-    #
     def test_user_model
       @test_user_model ||= Class.new(Cubby::Model) do
         def self.name
@@ -66,7 +65,7 @@ module SpecHelper
       address: FFaker::AddressUS.street_address,
       city: FFaker::AddressUS.city,
       state: FFaker::AddressUS.state,
-      zip: FFaker::AddressUS.zip)
+      zip: FFaker::AddressUS.zip_code)
 
       Address.new.tap do |a|
         a.address = address

@@ -6,7 +6,7 @@ require 'cubby/model'
 require 'pry'
 require 'awesome_print'
 require 'rainbow'
-require 'ffaker'
+require_relative '../spec/spec_helper'
 
 module TestModels
   class BasicUser < Cubby::Model
@@ -40,6 +40,8 @@ class Cubby::Console
   end
 
   def initialize
+    @store = nil
+    @tmpdir = nil
     reset!
 
     ['SIGINT', 'SIGHUP'].each { |signal| trap(signal) { cleanup! } }
@@ -48,6 +50,7 @@ class Cubby::Console
   def reset!(opts = {})
     cleanup!
     @tmpdir = Pathname Dir.mktmpdir
+    SpecHelper.tmpdir = @tmpdir
     Cubby.open @tmpdir, opts
     @store = Cubby.store
   end
@@ -90,10 +93,10 @@ LMDB Stat:
   def start
     puts <<-EOF
 Console:
-  reset!: Create a fresh environment
-  store:  Instance of store
-  tmpdir: Data directory
-  status: LMDB Status
+  reset!:      Create a fresh environment
+  store:       Instance of store
+  tmpdir:      Data directory
+  store_stats: Cubby/LMDB Status
     EOF
 
     AwesomePrint.pry!
@@ -109,7 +112,7 @@ Console:
       Cubby::Console.instance.tmpdir
     end
 
-    Pry::Commands.block_command 'cubby_stat', 'LMDB Status' do
+    Pry::Commands.block_command 'store_stats', 'LMDB Status' do
       output.puts Cubby::Console.instance.status
     end
 

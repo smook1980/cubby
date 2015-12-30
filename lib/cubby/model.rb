@@ -1,3 +1,4 @@
+require 'forwardable'
 require 'active_model'
 require_relative 'types'
 require_relative 'model/storable'
@@ -28,10 +29,9 @@ module Cubby
     end
 
     def ==(other)
-      super ||
-      other.instance_of?(self.class) &&
-      other.id == id
+      super || other.instance_of?(self.class) && other.id == id
     end
-    alias :eql? :==
+
+    alias_method :eql?, :==
   end
 end

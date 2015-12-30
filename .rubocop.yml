@@ -1,0 +1,30 @@
+AllCops:
+  Include:
+    - '**/Rakefile'
+  Exclude:
+    - 'spec/**/*'
+    - 'bin/**/*'
+
+Metrics/LineLength:
+  Max: 120
+
+Style/Documentation:
+  Exclude:
+    - 'lib/cubby.rb'
+    - 'lib/cubby/logger.rb'
+    - 'lib/cubby/model.rb'
+    - 'lib/cubby/model/modelable.rb'
+    - 'lib/cubby/model/storable.rb'
+    - 'lib/cubby/store.rb'
+    - 'lib/cubby/store/entity.rb'
+    - 'lib/cubby/store/model_enumerable.rb'
+    - 'lib/cubby/store/model_reader.rb'
+    - 'lib/cubby/store/serializing_proxy.rb'
+    - 'lib/cubby/types.rb'
+    - 'lib/cubby/version.rb'
+
+Style/TrailingUnderscoreVariable:
+  AllowNamedUnderscoreVariables: true
+
+Rails/AllCops:
+  enabled: false

@@ -1,6 +1,6 @@
 module Cubby
   class Store
-    EntityNotFound = Class.new(StandardError)
+    EntityNotFound  = Class.new(StandardError)
     EntityReadError = Class.new(StandardError)
 
     class Entity < SimpleDelegator
@@ -9,31 +9,49 @@ module Cubby
           kvs.cursor do |c|
             key, _ = c.set(id)
             fail EntityNotFound, "Model not found for id #{id}" if key != id
-            Entity.new(c)
+            EntityReader.read_entity!(c)
           end
         end
 
         def each(kvs)
           kvs.cursor do |c|
             c.first
-            yield Entity.new(c) while c.get
+            yield EntityReader.read_entity!(c) while c.get
           end
 
           nil
         end
       end
 
-      attr_reader :id
+      attr_reader :id, :metadata
 
-      def initialize(cursor)
-        super(load!(cursor))
+      def initialize(id, metadata, data)
+        @id = id
+        @metadata = metadata
+        super(data)
+      end
+    end
+
+    class EntityReader
+      attr_reader :id, :metadata, :data
+
+      def self.read_entity!(cursor)
+        reader = new.tap { |er| er.read!(cursor) }
+
+        Entity.new(reader.id, reader.metadata, reader.data)
+      end
+
+      def read!(cursor)
+        @id, @metadata = read_metadata!(cursor)
+        @data = read_data!(cursor)
+        self
       end
 
       private
 
-      def load!(cursor)
-        key, = cursor.get
-        @id, attr = key.split('::')
+      def read_metadata!(cursor)
+        key, metadata = cursor.get
+        id, attr = key.split('::')
 
         # Meta record is stored with only ID and no attribute
         if id.nil? || !attr.nil?
@@ -41,6 +59,10 @@ module Cubby
           fail EntityReadError, message
         end
 
+        [id, metadata]
+      end
+
+      def read_data!(cursor)
         data = {}
 
         while item = cursor.next

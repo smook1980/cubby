@@ -1,4 +1,3 @@
-require 'forwardable'
 require 'weakref'
 require 'lmdb'
 require_relative 'store/bucket'
